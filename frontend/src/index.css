@@ -1,4 +1,51 @@
 @import "tailwindcss";
 
-/* Globális alapstílusok. Az egyedi témaértékeket (színek, betűk) később
-   itt, a Tailwind v4 @theme blokkjában definiáljuk. */
+/*
+ * SmartFridge dizájnrendszer
+ * Minimalista, pasztell, természetes és otthonos hangulat.
+ * A tokenekből Tailwind utility osztályok generálódnak,
+ * pl. --color-primary → bg-primary, text-primary, border-primary.
+ */
+@theme {
+  /* Betűtípus */
+  --font-sans: "Nunito", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
+
+  /* Felületek */
+  --color-canvas: #f7f5ef; /* oldalháttér */
+  --color-surface: #ffffff; /* kártyák */
+  --color-line: #e7e3d9; /* szegélyek, elválasztók */
+
+  /* Szöveg */
+  --color-ink: #303a32; /* fő szövegszín */
+  --color-ink-muted: #5e6a60; /* másodlagos szöveg */
+
+  /* Zsályazöld (díszítő, háttér – szövegszínnek túl világos) */
+  --color-sage: #a8b5a2;
+  --color-sage-soft: #e9ede6;
+
+  /* Elsődleges (gombok, aktív elemek, linkek) */
+  --color-primary: #526b50;
+  --color-primary-hover: #435942;
+
+  /* Pasztell barack (kiemelés, figyelmeztetés, lejáró tételek) */
+  --color-peach: #e6b8a2;
+  --color-peach-soft: #f8e9e1;
+
+  /* Hiba / veszélyes művelet */
+  --color-danger: #a65448;
+  --color-danger-soft: #f6e3df;
+
+  /* Finom árnyékok */
+  --shadow-soft: 0 1px 2px rgb(48 58 50 / 0.04), 0 4px 14px rgb(48 58 50 / 0.06);
+  --shadow-raised: 0 2px 4px rgb(48 58 50 / 0.05), 0 12px 32px rgb(48 58 50 / 0.1);
+}
+
+@layer base {
+  body {
+    @apply bg-canvas font-sans text-ink antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+  }
+}

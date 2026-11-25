@@ -5,7 +5,8 @@ egy fejlesztő a frontendért, kettő a backendért és az adatbázisért felel.
 
 ## Technológiák
 
-- **Frontend:** React 19, TypeScript, Vite, Tailwind CSS v4 (`@tailwindcss/vite` plugin)
+- **Frontend:** React 19, TypeScript, Vite, Tailwind CSS v4 (`@tailwindcss/vite` plugin),
+  React Router, lucide-react ikonok
 - **Backend:** ASP.NET Core Web API (külön csapattag fejleszti)
 - **Adatbázis:** PostgreSQL (külön csapattag fejleszti)
 - **Futtatás:** Docker Compose
@@ -72,8 +73,7 @@ src/
 ├── routes/         # útvonal-definíciók, védett útvonalak
 ├── types/          # közös TypeScript típusok (backend DTO-k tükre)
 ├── utils/          # tiszta segédfüggvények (dátum, mértékegység-átváltás, formázás)
-├── App.tsx
-├── main.tsx
+├── main.tsx        # belépési pont (RouterProvider)
 └── index.css       # Tailwind import és globális stílusok
 ```
 
@@ -82,6 +82,89 @@ src/
 - Import alias: `@/` → `src/` (pl. `import { Button } from '@/components/ui/Button'`).
 - Komponensfájlok PascalCase névvel (`FoodItemCard.tsx`), hookok `use` előtaggal (`useFridgeItems.ts`).
 - Stílusozás Tailwind utility osztályokkal; egyedi témaértékek az `index.css` `@theme` blokkjában.
+- Feltételes osztálynevekhez a `cn()` segédfüggvényt használd (`@/utils/cn`).
+- Komponensfájlból csak komponenst exportálj (React Fast Refresh); a nem komponens
+  exportok (pl. `buttonStyles`) külön `.ts` fájlba kerüljenek.
 - Az adatelérés mindig az `api/` rétegen keresztül történjen, hogy a mintaadatok később
   egy helyen cserélhetők legyenek a valódi backend hívásokra.
 - A backend és a frontend közötti adatszerkezeteket a `types/` mappában tartsd egyeztetve a backend csapattal.
+
+## Útvonalak és navigáció
+
+- Könyvtár: **React Router** (`react-router` csomag, adat-router API).
+- Útvonalak szövegei: `src/constants/routes.ts` (`ROUTES`) – soha ne írj be kézzel útvonalszöveget.
+- Útvonal-definíciók: `src/routes/routes.tsx`; a router létrehozása: `src/routes/router.ts`.
+- Minden útvonal kapjon `handle: { title }` mezőt; ebből jön a fejléc és a böngészőfül címe
+  (`usePageTitle` hook).
+- Menüpontok: `src/constants/navigation.ts` (`MAIN_NAV_ITEMS`, `ACCOUNT_NAV_ITEMS`).
+  Új oldalnál itt is vedd fel, így az asztali és a mobil menüben is megjelenik.
+
+| Oldal          | Útvonal           | Elrendezés   |
+| -------------- | ----------------- | ------------ |
+| Kezdőlap       | `/`               | `AppLayout`  |
+| Hűtőm          | `/hutom`          | `AppLayout`  |
+| Receptek       | `/receptek`       | `AppLayout`  |
+| Bevásárlólista | `/bevasarlolista` | `AppLayout`  |
+| Értesítések    | `/ertesitesek`    | `AppLayout`  |
+| Profilom       | `/profil`         | `AppLayout`  |
+| Bejelentkezés  | `/bejelentkezes`  | `AuthLayout` |
+| Regisztráció   | `/regisztracio`   | `AuthLayout` |
+| 404            | `*`               | `AppLayout`  |
+
+- `AppLayout`: bal oldali menü (`Sidebar`, `lg` felett) + fejléc + tartalom. `lg` alatt a menü
+  a fejléc menügombjával nyitható oldalsó panel (`MobileNav`), Esc-re és háttérkattintásra záródik.
+- `AuthLayout`: középre igazított kártya, oldalsó navigáció nélkül.
+
+## Dizájnrendszer
+
+Hangulat: **minimalista, pasztell, természetes, otthonos.**
+
+### Színpaletta (`src/index.css` → `@theme`)
+
+| Token               | Érték     | Tailwind osztály példa           | Használat                                   |
+| ------------------- | --------- | -------------------------------- | ------------------------------------------- |
+| `canvas`            | `#F7F5EF` | `bg-canvas`                      | oldalháttér                                 |
+| `surface`           | `#FFFFFF` | `bg-surface`                     | kártyák, panelek, beviteli mezők            |
+| `sage`              | `#A8B5A2` | `bg-sage`, `border-sage`         | díszítés, hover szegély – **szövegnek nem** |
+| `sage-soft`         | `#E9EDE6` | `bg-sage-soft`                   | aktív menüpont, ikonháttér, másodlagos gomb |
+| `primary`           | `#526B50` | `bg-primary`, `text-primary`     | elsődleges gombok, linkek, aktív elemek     |
+| `primary-hover`     | `#435942` | `hover:bg-primary-hover`         | elsődleges gomb hover                       |
+| `peach`             | `#E6B8A2` | `bg-peach`                       | kiemelés, lejáró tételek                    |
+| `peach-soft`        | `#F8E9E1` | `bg-peach-soft`                  | figyelmeztető háttér, avatar                |
+| `ink`               | `#303A32` | `text-ink`                       | fő szöveg                                   |
+| `ink-muted`         | `#5E6A60` | `text-ink-muted`                 | másodlagos szöveg                           |
+| `line`              | `#E7E3D9` | `border-line`                    | szegélyek, elválasztók                      |
+| `danger` / `-soft`  | `#A65448` | `bg-danger`, `text-danger`       | hibák, törlés                               |
+
+Ne használj nyers hex kódot vagy a Tailwind alapszíneit (`slate`, `green` stb.) – csak a fenti tokeneket.
+
+### Szabályok
+
+- **Betűtípus:** Nunito (Google Fonts, `index.html`), tartalék: rendszer sans-serif.
+  Címek `font-extrabold`/`font-bold`, szöveg normál, címkék/gombok `font-semibold`.
+- **Lekerekítés:** kártyák `rounded-2xl`, gombok és beviteli mezők `rounded-xl`, avatar `rounded-full`.
+- **Árnyék:** csak `shadow-soft` (kártya, gomb) és `shadow-raised` (lebegő panel, mobil menü).
+- **Térköz:** szellős elrendezés – oldaltartalom `py-8`/`lg:py-10`, kártyák között `gap-4`,
+  oldalcím alatt `mb-8`. Tartalom max. szélessége `max-w-6xl`.
+- **Ikonok:** kizárólag `lucide-react`. Méret: menüben 20, gombban 18 (kis gombnál 16),
+  kiemelt ikon 22–26. Díszítő ikon mindig `aria-hidden="true"`; csak ikonos gombnál kötelező az `aria-label`.
+- **Animáció:** csak finom színátmenet (`transition-colors duration-150`) és a betöltésjelző forgása.
+  **Tilos:** színátmenetes (gradient) háttér, mozgó/ugráló animációk, transzformációs hover effektek.
+- **Reszponzivitás:** mobil-első; töréspontok: `sm` (640px), `lg` (1024px – itt jelenik meg az oldalsáv),
+  `xl` (1280px). Minden oldalt ellenőrizz kb. 375px szélességen is.
+- **Akadálymentesség:** minden beviteli mezőnek legyen címkéje (`Input` `label` propja kötelező),
+  a fókusz legyen látható (globális `:focus-visible` körvonal).
+
+### Közös komponensek (`src/components`)
+
+| Komponens       | Fájl                          | Leírás                                                                 |
+| --------------- | ----------------------------- | ---------------------------------------------------------------------- |
+| `Button`        | `ui/Button.tsx`               | `variant`: primary, secondary, accent, ghost, danger; `size`: sm, md, lg, icon; `icon`, `isLoading`, `fullWidth` |
+| `buttonStyles`  | `ui/buttonStyles.ts`          | gombstílus linkekhez (`<Link className={buttonStyles()}>`)             |
+| `Card`, `CardHeader` | `ui/Card.tsx`            | fehér, lekerekített doboz; `padding`: none, sm, md, lg                 |
+| `Input`         | `ui/Input.tsx`                | címke, `hint`, `error`, bal oldali `icon`, akadálymentes hibaüzenet    |
+| `EmptyState`    | `ui/EmptyState.tsx`           | üres lista / még el nem készült funkció jelzése                        |
+| `PageHeader`    | `layout/PageHeader.tsx`       | oldalcím, leírás, jobb oldali műveletek                                |
+| `Sidebar`, `MobileNav`, `NavMenu`, `Header`, `Logo` | `layout/` | oldalváz elemei                                   |
+
+Új UI elem előtt nézd meg, hogy a meglévő komponensekből összerakható-e.
