@@ -1,0 +1,4 @@
+@import "tailwindcss";
+
+/* Globális alapstílusok. Az egyedi témaértékeket (színek, betűk) később
+   itt, a Tailwind v4 @theme blokkjában definiáljuk. */
