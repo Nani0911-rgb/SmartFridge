@@ -115,6 +115,27 @@ src/
   a fejléc menügombjával nyitható oldalsó panel (`MobileNav`), Esc-re és háttérkattintásra záródik.
 - `AuthLayout`: középre igazított kártya, oldalsó navigáció nélkül.
 
+## Hitelesítés
+
+- **Szolgáltatás:** a komponensek csak az `AuthService` interfészt ismerik (`src/types/auth.ts`).
+  Az aktív implementációt az `src/api/authService.ts` választja ki – a backend elkészülte után
+  **csak ezt a fájlt** kell átírni a valódi API-ra (HttpOnly sütis munkamenet javasolt).
+- **Mock:** `src/mocks/mockAuthService.ts` – **kizárólag fejlesztéshez**. A felhasználók a memóriában
+  élnek (új regisztráció oldal-újratöltéskor elvész), mesterséges hálózati késleltetéssel.
+- **Demófiók (csak fejlesztéshez):** `demo@smartfridge.hu` / `Demo1234`. A bejelentkezési oldalon
+  csak `npm run dev` alatt jelenik meg (`import.meta.env.DEV`).
+- **Tárolás:** jelszót, tokent vagy személyes adatot **tilos** `localStorage`-ba/`sessionStorage`-ba írni.
+  A mock csak a felhasználó azonosítóját tartja a `sessionStorage`-ban.
+- **Állapot:** `AuthProvider` (`src/features/auth/AuthProvider.tsx`) + `useAuth()` hook;
+  `status`: `loading` | `authenticated` | `unauthenticated`.
+- **Útvonalvédelem:** `ProtectedRoute` (kijelentkezve → `/bejelentkezes`, a kért oldal megjegyzésével),
+  `GuestRoute` (bejelentkezve → a kért oldal vagy a kezdőlap). Az átirányítást ezek végzik, nem az űrlapok.
+- **Hibák:** az API réteg `ApiError`-t dob magyar üzenettel (`src/api/errors.ts`);
+  a megjelenítéshez `getErrorMessage()`.
+- **Űrlapok:** a `useForm` hook (`src/hooks/useForm.ts`) kezeli az értékeket, a mezőnkénti hibákat,
+  a betöltési állapotot és a szerverhibát. A validáció tiszta függvény (`features/auth/validation.ts`),
+  minden hibaüzenet magyar. Az űrlapok `noValidate` attribútummal, saját ellenőrzéssel működnek.
+
 ## Dizájnrendszer
 
 Hangulat: **minimalista, pasztell, természetes, otthonos.**
@@ -164,6 +185,9 @@ Ne használj nyers hex kódot vagy a Tailwind alapszíneit (`slate`, `green` stb
 | `Card`, `CardHeader` | `ui/Card.tsx`            | fehér, lekerekített doboz; `padding`: none, sm, md, lg                 |
 | `Input`         | `ui/Input.tsx`                | címke, `hint`, `error`, bal oldali `icon`, akadálymentes hibaüzenet    |
 | `EmptyState`    | `ui/EmptyState.tsx`           | üres lista / még el nem készült funkció jelzése                        |
+| `PasswordInput` | `ui/PasswordInput.tsx`        | jelszómező megjelenítés/elrejtés gombbal                               |
+| `Alert`         | `ui/Alert.tsx`                | üzenetdoboz (`error`, `info`)                                          |
+| `FullPageLoader`| `ui/FullPageLoader.tsx`       | teljes képernyős betöltésjelző                                         |
 | `PageHeader`    | `layout/PageHeader.tsx`       | oldalcím, leírás, jobb oldali műveletek                                |
 | `Sidebar`, `MobileNav`, `NavMenu`, `Header`, `Logo` | `layout/` | oldalváz elemei                                   |
 
