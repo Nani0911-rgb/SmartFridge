@@ -1,0 +1,11 @@
+@SmartFridge.Api_HostAddress = http://localhost:5216
+
+GET {{SmartFridge.Api_HostAddress}}/openapi/v1.json
+Accept: application/json
+
+###
+
+GET {{SmartFridge.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
